@@ -6,7 +6,7 @@ import com.github.ynverxe.mmts.core.MMTSHandler;
 import com.github.ynverxe.mmts.core.format.FormattingContextNamespaces;
 import com.github.ynverxe.mmts.core.format.FormattingContext;
 import com.github.ynverxe.mmts.translation.Linguist;
-import com.github.ynverxe.mmts.translation.TranslationData;
+import com.github.ynverxe.mmts.translation.MessageData;
 import com.github.ynverxe.mmts.core.remittent.Remittent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,19 +44,19 @@ public class TranslatingConfigurableMessage extends AbstractConfigurableMessage 
         String lang = remittent.getLang();
 
         //noinspection ConstantConditions
-        TranslationData translationData = mmtsHandler.getTranslationData(lang, path);
+        MessageData messageData = mmtsHandler.getTranslationData(lang, path);
 
-        if (translationData.getDataMap().isEmpty()) {
-            if (defaultMessage instanceof TranslationData) {
-                translationData = (TranslationData) defaultMessage;
+        if (messageData.getDataMap().isEmpty()) {
+            if (defaultMessage instanceof MessageData) {
+                messageData = (MessageData) defaultMessage;
             }
 
-            if (defaultMessage == null || translationData.getDataMap().isEmpty()) {
+            if (defaultMessage == null || messageData.getDataMap().isEmpty()) {
                 performEntityStrategy(remittent.getEntity(), entityHandlerContainer);
             }
         }
 
-        return translationData.getDataMap().isEmpty() ? defaultMessage : translationData;
+        return messageData.getDataMap().isEmpty() ? defaultMessage : messageData;
     }
 
     @Override
@@ -78,16 +78,16 @@ public class TranslatingConfigurableMessage extends AbstractConfigurableMessage 
             return messageList;
         }
 
-        if (message instanceof TranslationData) {
-            TranslationData translationData = (TranslationData) message;
+        if (message instanceof MessageData) {
+            MessageData messageData = (MessageData) message;
 
             Class messageClass = this.messageClass;
 
-            if (!translationData.getDataMap().isEmpty()) {
+            if (!messageData.getDataMap().isEmpty()) {
                 if (messageClass != null) {
-                    return mmtsHandler.formatMessage(translationData, messageClass, contextConfigurator);
+                    return mmtsHandler.formatMessage(messageData, messageClass, contextConfigurator);
                 } else {
-                    return mmtsHandler.formatAbstractMessage(translationData, contextConfigurator);
+                    return mmtsHandler.formatAbstractMessage(messageData, contextConfigurator);
                 }
             }
         } else {

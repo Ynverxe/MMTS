@@ -1,7 +1,9 @@
 package com.github.ynverxe.mmts.core;
 
+import com.github.ynverxe.data.DataNode;
 import com.github.ynverxe.mmts.core.format.FormattingContextNamespaces;
 import com.github.ynverxe.mmts.core.remittent.Remittent;
+import com.github.ynverxe.mmts.translation.MessageData;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -62,6 +64,14 @@ public class MessengerTest {
 
     private void printSeparator() {
         System.out.println("---------------------------------");
+    }
+
+    private void formatMessageData() {
+        DataNode dataNode = new DataNode();
+        dataNode.put("value", "Hi");
+
+        MessageData messageData = MessageData.withoutPath(dataNode);
+
     }
 
 }

@@ -17,7 +17,7 @@ import com.github.ynverxe.mts.common.HierarchyMapSearchUtil;
 import com.github.ynverxe.mmts.translation.AbstractTranslationFinder;
 import com.github.ynverxe.mmts.translation.Linguist;
 import com.github.ynverxe.mmts.translation.SourceCreator;
-import com.github.ynverxe.mmts.translation.TranslationData;
+import com.github.ynverxe.mmts.translation.MessageData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,18 +105,18 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
     }
 
     @Override
-    public @NotNull Object formatAbstractMessage(@NotNull TranslationData translationData, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
-        return messageFormatter.formatAbstractMessage(translationData, contextConfigurator);
+    public @NotNull Object formatAbstractMessage(@NotNull MessageData messageData, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
+        return messageFormatter.formatAbstractMessage(messageData, contextConfigurator);
     }
 
     @Override
-    public @NotNull Object formatMessage(@NotNull TranslationData translationData, @NotNull String alias, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
-        return messageFormatter.formatMessage(translationData, alias, contextConfigurator);
+    public @NotNull Object formatMessage(@NotNull MessageData messageData, @NotNull String alias, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
+        return messageFormatter.formatMessage(messageData, alias, contextConfigurator);
     }
 
     @Override
-    public <T> @NotNull T formatMessage(@NotNull TranslationData translationData, @NotNull Class<T> requiredMessageClass, FormattingContext.@Nullable Configurator contextConfigurator) throws NoCreatorFoundException {
-        return messageFormatter.formatMessage(translationData, requiredMessageClass, contextConfigurator);
+    public <T> @NotNull T formatMessage(@NotNull MessageData messageData, @NotNull Class<T> requiredMessageClass, FormattingContext.@Nullable Configurator contextConfigurator) throws NoCreatorFoundException {
+        return messageFormatter.formatMessage(messageData, requiredMessageClass, contextConfigurator);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
     }
 
     @Override
-    public @Nullable TranslationData toMessageData(@NotNull Object obj) {
+    public @Nullable MessageData toMessageData(@NotNull Object obj) {
         return messageFormatter.toMessageData(obj);
     }
 

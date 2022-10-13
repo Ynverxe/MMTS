@@ -7,7 +7,7 @@ import com.github.ynverxe.mmts.core.format.FormattingContextNamespaces;
 import com.github.ynverxe.mmts.core.format.FormattingContext;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.remittent.Remittent;
-import com.github.ynverxe.mmts.translation.TranslationData;
+import com.github.ynverxe.mmts.translation.MessageData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,8 +94,8 @@ public abstract class AbstractConfigurableMessage implements ConfigurableMessage
             if (message == null) return;
 
             if (mode.isEmpty()) {
-                if (message instanceof TranslationData) {
-                    mode = ((TranslationData) message).getString("mode");
+                if (message instanceof MessageData) {
+                    mode = ((MessageData) message).getString("mode");
                 } else {
                     mode = "default";
                 }

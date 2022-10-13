@@ -8,12 +8,12 @@ import java.util.Optional;
 
 
 /**
- * Finds the {@link TranslationData} of a given path, in the {@link TranslationSource} of a given language.
+ * Finds the {@link MessageData} of a given path, in the {@link TranslationSource} of a given language.
  *
  * In other words, is the principal translation handler:
  * <ul>
  *     <li>Binds the {@link TranslationSource} to some language.</li>
- *     <li>Provides the {@link TranslationData} from a language source.</li>
+ *     <li>Provides the {@link MessageData} from a language source.</li>
  *     <li>Resolves entities languages, see {@link TranslationFinder#resolveLang(Object)}.</li>
  * </ul>
  */
@@ -27,7 +27,7 @@ public interface TranslationFinder {
      * @param path         - The data path
      * @return the found data or empty if it's the path is empty.
      */
-    @NotNull TranslationData getTranslationData(@NotNull Object entityOrLang, @NotNull String path);
+    @NotNull MessageData getTranslationData(@NotNull Object entityOrLang, @NotNull String path);
 
     /**
      * Get the translation data in the provided path if it's found or else an empty result.
@@ -36,7 +36,7 @@ public interface TranslationFinder {
      * @param entityOrLang - An entity or lang (as {@link String})
      * @return the found data or {@link Optional#empty()} if it's the path is empty.
      */
-    @NotNull Optional<TranslationData> findTranslationData(@NotNull String path, @NotNull Object entityOrLang);
+    @NotNull Optional<MessageData> findTranslationData(@NotNull String path, @NotNull Object entityOrLang);
 
     /**
      * @param lang - The source lang

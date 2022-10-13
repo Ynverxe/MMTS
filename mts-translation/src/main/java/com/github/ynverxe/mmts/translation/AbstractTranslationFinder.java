@@ -16,14 +16,14 @@ public abstract class AbstractTranslationFinder implements TranslationFinder {
     }
 
     @Override
-    public @NotNull TranslationData getTranslationData(@NotNull Object entityOrLang, @NotNull String path) {
+    public @NotNull MessageData getTranslationData(@NotNull Object entityOrLang, @NotNull String path) {
         return findTranslationData(path, entityOrLang)
-                .orElse(TranslationData.createMessageData(path, null));
+                .orElse(MessageData.createMessageData(path, null));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public @NotNull Optional<TranslationData> findTranslationData(@NotNull String path, @NotNull Object entityOrLang) {
+    public @NotNull Optional<MessageData> findTranslationData(@NotNull String path, @NotNull Object entityOrLang) {
         Objects.requireNonNull(path, "path");
 
         String lang = entityOrLang instanceof String ? (String) entityOrLang : resolveLang(entityOrLang);
@@ -50,7 +50,7 @@ public abstract class AbstractTranslationFinder implements TranslationFinder {
             map = Collections.singletonMap("value", found);
         }
 
-        return Optional.of(TranslationData.createMessageData(path, DataNode.fromMap(map)));
+        return Optional.of(MessageData.createMessageData(path, DataNode.fromMap(map)));
     }
 
     @Override

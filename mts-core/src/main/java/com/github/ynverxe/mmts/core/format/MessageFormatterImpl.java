@@ -7,7 +7,7 @@ import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacerImpl;
 import com.github.ynverxe.mmts.core.util.ComposedKey;
 import com.github.ynverxe.mmts.core.remittent.Remittent;
-import com.github.ynverxe.mmts.translation.TranslationData;
+import com.github.ynverxe.mmts.translation.MessageData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,11 +32,11 @@ public class MessageFormatterImpl implements MessageFormatter {
             @NotNull Object object, @Nullable FormattingContext.Configurator contextConfigurator
     ) {
         try {
-            TranslationData translationData = toMessageData(object);
+            MessageData messageData = toMessageData(object);
 
-            if (translationData == null) return null;
+            if (messageData == null) return null;
 
-            return formatMessage(translationData, object.getClass(), contextConfigurator);
+            return formatMessage(messageData, object.getClass(), contextConfigurator);
         } catch (NoCreatorFoundException ignored) {}
 
         return object;
@@ -44,7 +44,7 @@ public class MessageFormatterImpl implements MessageFormatter {
 
     @Override
     public <T> @NotNull T formatMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             @NotNull Class<T> requiredMessageClass,
             @Nullable FormattingContext.Configurator contextConfigurator
     ) throws NoCreatorFoundException {
@@ -59,7 +59,7 @@ public class MessageFormatterImpl implements MessageFormatter {
         if (contextConfigurator != null) contextConfigurator.configure(formattingContext);
 
         T message = messageExpansion.createNewMessage(
-                translationData,
+                messageData,
                 this,
                 formattingContext
         );
@@ -80,20 +80,20 @@ public class MessageFormatterImpl implements MessageFormatter {
 
     @Override
     public @NotNull Object formatAbstractMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             FormattingContext.@Nullable Configurator contextConfigurator
     ) throws IllegalArgumentException {
-        String messageAlias = translationData.getString("alias");
+        String messageAlias = messageData.getString("alias");
 
         if (messageAlias == null)
             throw new IllegalArgumentException("no alias found");
 
-        return formatMessage(translationData, messageAlias, contextConfigurator);
+        return formatMessage(messageData, messageAlias, contextConfigurator);
     }
 
     @Override
     public @NotNull Object formatMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             @NotNull String alias,
             FormattingContext.@Nullable Configurator contextConfigurator
     ) throws IllegalArgumentException {
@@ -102,7 +102,7 @@ public class MessageFormatterImpl implements MessageFormatter {
         if (messageType == null)
             throw new IllegalArgumentException("no class found with alias: " + alias);
 
-        return formatMessage(translationData, messageType, contextConfigurator);
+        return formatMessage(messageData, messageType, contextConfigurator);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class MessageFormatterImpl implements MessageFormatter {
     }
 
     @Override
-    public @Nullable TranslationData toMessageData(@NotNull Object obj) {
+    public @Nullable MessageData toMessageData(@NotNull Object obj) {
         Class messageClass = obj.getClass();
         MessageExpansion messageExpansion = (MessageExpansion) messageHandlersMap.get(
                 forMessageCreator(messageClass)

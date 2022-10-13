@@ -8,16 +8,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * Contains the data found on a path inside a translation source. Is not mutable.
+ * Contains the message data. Is not mutable.
  */
 @SuppressWarnings("unused")
-public final class TranslationData implements FunctionalDataContainer<String> {
+public final class MessageData implements FunctionalDataContainer<String> {
 
     private final String path;
     private final DataNode dataNode;
     private final Map<String, Object> dataMap;
 
-    private TranslationData(String path, DataNode dataNode) {
+    private MessageData(String path, DataNode dataNode) {
         this.path = path;
         this.dataNode = dataNode;
         this.dataMap = dataNode.simplify();
@@ -70,8 +70,8 @@ public final class TranslationData implements FunctionalDataContainer<String> {
      * @param dataNode - The data.
      * @return a new instance of this class.
      */
-    public static @NotNull TranslationData createMessageData(@Nullable String path, @Nullable DataNode dataNode) {
-        return new TranslationData(path, dataNode != null ? dataNode : DataNode.EMPTY);
+    public static @NotNull MessageData createMessageData(@Nullable String path, @Nullable DataNode dataNode) {
+        return new MessageData(path, dataNode != null ? dataNode : DataNode.EMPTY);
     }
 
     /**
@@ -80,7 +80,7 @@ public final class TranslationData implements FunctionalDataContainer<String> {
      * @param dataNode - The data.
      * @return a new instance of this class.
      */
-    public static @NotNull TranslationData withoutPath(@Nullable DataNode dataNode) {
+    public static @NotNull MessageData withoutPath(@Nullable DataNode dataNode) {
         return createMessageData(null, dataNode);
     }
 

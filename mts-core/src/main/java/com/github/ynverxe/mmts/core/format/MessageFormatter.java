@@ -4,14 +4,14 @@ import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderApplier;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
-import com.github.ynverxe.mmts.translation.TranslationData;
+import com.github.ynverxe.mmts.translation.MessageData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface MessageFormatter {
 
     @NotNull Object formatMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             @NotNull String alias,
             @Nullable FormattingContext.Configurator contextConfigurator
     ) throws IllegalArgumentException;
@@ -22,12 +22,12 @@ public interface MessageFormatter {
     );
 
     @NotNull Object formatAbstractMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             @Nullable FormattingContext.Configurator contextConfigurator
     ) throws IllegalArgumentException;
 
     <T> @NotNull T formatMessage(
-            @NotNull TranslationData translationData,
+            @NotNull MessageData messageData,
             @NotNull Class<T> requiredMessageClass,
             @Nullable FormattingContext.Configurator contextConfigurator
     ) throws NoCreatorFoundException;
@@ -37,7 +37,7 @@ public interface MessageFormatter {
             @Nullable FormattingContext.Configurator contextConfigurator
     );
 
-    @Nullable TranslationData toMessageData(@NotNull Object obj);
+    @Nullable MessageData toMessageData(@NotNull Object obj);
 
     <T> void addMessageCreator(@NotNull Class<T> messageClass, @NotNull MessageExpansion<T> messageExpansion);
 
