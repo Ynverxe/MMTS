@@ -76,7 +76,8 @@ public abstract class AbstractConfigurableMessage implements ConfigurableMessage
     @Override
     public void send(@NotNull Object entityOrEntities, @NotNull String mode) {
         if (entityOrEntities instanceof Iterable) {
-            ((Iterable<?>) entityOrEntities).forEach(this::send);
+            @NotNull String finalMode = mode;
+            ((Iterable<?>) entityOrEntities).forEach(entity -> send(entity, finalMode));
         } else {
             Object entity = mmtsHandler.tryResolveEntity(entityOrEntities);
 
