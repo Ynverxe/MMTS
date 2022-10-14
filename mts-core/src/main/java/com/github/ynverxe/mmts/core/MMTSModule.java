@@ -1,6 +1,6 @@
 package com.github.ynverxe.mmts.core;
 
-import com.github.ynverxe.mmts.core.placeholder.PlaceholderApplier;
+import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mmts.core.format.MessageExpansion;
 import com.github.ynverxe.mmts.core.format.FormattingInterceptor;
@@ -54,13 +54,13 @@ public interface MMTSModule {
         return mmtsHandler.createPlaceholderReplacer(startDelimiter, endDelimiter);
     }
 
-    default void installPlaceholderApplier(@NotNull String identifier, @NotNull PlaceholderApplier placeholderApplier) {
+    default void installPlaceholderApplier(@NotNull String identifier, @NotNull PlaceholderValueProvider placeholderValueProvider) {
         MMTSHandler mmtsHandler = getMMTSHandler();
 
         if (mmtsHandler == null)
             throw new IllegalStateException("MMTSHandler is not initialized");
 
-        mmtsHandler.addPlaceholderApplier(identifier, placeholderApplier);
+        mmtsHandler.addPlaceholderValueProvider(identifier, placeholderValueProvider);
     }
 
     default void bindMessageTypeAlias(@NotNull String alias, @NotNull Class<?> messageType) {

@@ -9,12 +9,12 @@ import java.util.Objects;
 public class PlaceholderReplacerImpl implements PlaceholderReplacer {
 
     private final char startDelimiter, endDelimiter;
-    private final Map<String, PlaceholderApplier> placeholderApplierMap;
+    private final Map<String, PlaceholderValueProvider> placeholderApplierMap;
 
     public PlaceholderReplacerImpl(
             char startDelimiter,
             char endDelimiter,
-            Map<String, PlaceholderApplier> placeholderApplierMap
+            Map<String, PlaceholderValueProvider> placeholderApplierMap
     ) {
         this.startDelimiter = startDelimiter;
         this.endDelimiter = endDelimiter;
@@ -32,7 +32,7 @@ public class PlaceholderReplacerImpl implements PlaceholderReplacer {
         boolean fail = false;
         boolean reset = false;
         boolean identifiedPlaceholder = false;
-        PlaceholderApplier placeholderApplier = null;
+        PlaceholderValueProvider placeholderValueProvider = null;
 
         for (int i = 0; i < chars.length; i++) {
             char currentChar = text.charAt(i);
@@ -65,11 +65,11 @@ public class PlaceholderReplacerImpl implements PlaceholderReplacer {
                     continue;
                 }
 
-                if (placeholderApplier == null) {
-                    placeholderApplier = placeholderApplierMap.get(identifierBuilder.toString());
+                if (placeholderValueProvider == null) {
+                    placeholderValueProvider = placeholderApplierMap.get(identifierBuilder.toString());
                 }
 
-                if (placeholderApplier == null) {
+                if (placeholderValueProvider == null) {
                     fail = true;
                     break;
                 }
@@ -80,7 +80,7 @@ public class PlaceholderReplacerImpl implements PlaceholderReplacer {
                     continue;
                 }
 
-                String replaced = placeholderApplier.applyPlaceholders(entity, text, parametersBuilder.toString());
+                String replaced = placeholderValueProvider.getPlaceholderValue(entity, text, parametersBuilder.toString());
 
                 if (replaced != null) {
                     builder.append(replaced);
@@ -107,7 +107,7 @@ public class PlaceholderReplacerImpl implements PlaceholderReplacer {
                 reset = false;
                 fail = true;
                 identifiedPlaceholder = false;
-                placeholderApplier = null;
+                placeholderValueProvider = null;
                 identifierBuilder.setLength(0);
                 parametersBuilder.setLength(0);
             }

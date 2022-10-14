@@ -10,7 +10,7 @@ import com.github.ynverxe.mmts.core.format.FormattingInterceptor;
 import com.github.ynverxe.mmts.core.format.MessageFormatter;
 import com.github.ynverxe.mmts.core.message.SimpleConfigurableMessage;
 import com.github.ynverxe.mmts.core.message.TranslatingConfigurableMessage;
-import com.github.ynverxe.mmts.core.placeholder.PlaceholderApplier;
+import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mts.common.HierarchyMapSearchUtil;
@@ -140,8 +140,8 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
     }
 
     @Override
-    public void addPlaceholderApplier(@NotNull String identifier, @NotNull PlaceholderApplier placeholderApplier) {
-        messageFormatter.addPlaceholderApplier(identifier, placeholderApplier);
+    public void addPlaceholderValueProvider(@NotNull String identifier, @NotNull PlaceholderValueProvider placeholderValueProvider) {
+        messageFormatter.addPlaceholderValueProvider(identifier, placeholderValueProvider);
     }
 
     @Override

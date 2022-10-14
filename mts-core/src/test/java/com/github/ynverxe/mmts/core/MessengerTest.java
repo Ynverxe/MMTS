@@ -68,10 +68,9 @@ public class MessengerTest {
 
     private void formatMessageData() {
         DataNode dataNode = new DataNode();
-        dataNode.put("value", "Hi");
+        dataNode.put("value", "Hi %user_name%, today's date is: <date>");
 
         MessageData messageData = MessageData.withoutPath(dataNode);
 
     }
-
 }

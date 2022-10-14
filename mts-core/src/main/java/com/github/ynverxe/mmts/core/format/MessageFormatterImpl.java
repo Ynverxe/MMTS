@@ -1,7 +1,7 @@
 package com.github.ynverxe.mmts.core.format;
 
 import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
-import com.github.ynverxe.mmts.core.placeholder.PlaceholderApplier;
+import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacerImpl;
@@ -18,7 +18,7 @@ public class MessageFormatterImpl implements MessageFormatter {
 
     private final Map<ComposedKey, Object> messageHandlersMap = new HashMap<>();
     private final Map<PlaceholderDelimiterPack, PlaceholderReplacer> placeholderReplacerMap = new HashMap<>();
-    private final Map<String, PlaceholderApplier> placeholderApplierMap = new HashMap<>();
+    private final Map<String, PlaceholderValueProvider> placeholderValueProviderMap = new HashMap<>();
     private final Map<String, Class> messageAliases = new HashMap<>();
 
     private final PlaceholderReplacer DEFAULT_PLACEHOLDER_REPLACER = createPlaceholderReplacer('%', '%');
@@ -194,13 +194,13 @@ public class MessageFormatterImpl implements MessageFormatter {
     }
 
     @Override
-    public void addPlaceholderApplier(
+    public void addPlaceholderValueProvider(
             @NotNull String identifier,
-            @NotNull PlaceholderApplier placeholderApplier
+            @NotNull PlaceholderValueProvider placeholderValueProvider
     ) {
-        this.placeholderApplierMap.put(
+        this.placeholderValueProviderMap.put(
                 Objects.requireNonNull(identifier, "identifier"),
-                Objects.requireNonNull(placeholderApplier, "placeholderApplier")
+                Objects.requireNonNull(placeholderValueProvider, "placeholderApplier")
         );
     }
 
@@ -216,7 +216,7 @@ public class MessageFormatterImpl implements MessageFormatter {
                 (k) -> new PlaceholderReplacerImpl(
                         placeholderDelimiterPack.getStartDelimiter(),
                         placeholderDelimiterPack.getEndDelimiter(),
-                        placeholderApplierMap
+                        placeholderValueProviderMap
                 )
         );
     }

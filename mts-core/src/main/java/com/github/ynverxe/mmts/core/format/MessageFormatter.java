@@ -1,7 +1,7 @@
 package com.github.ynverxe.mmts.core.format;
 
 import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
-import com.github.ynverxe.mmts.core.placeholder.PlaceholderApplier;
+import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mmts.translation.MessageData;
@@ -43,8 +43,7 @@ public interface MessageFormatter {
 
     <T> void addFormattingVisitor(@NotNull Class<T> messageClass, @NotNull FormattingInterceptor<T> formattingInterceptor);
 
-    @SuppressWarnings("UnusedReturnValue")
-    void addPlaceholderApplier(@NotNull String identifier, @NotNull PlaceholderApplier placeholderApplier);
+    void addPlaceholderValueProvider(@NotNull String identifier, @NotNull PlaceholderValueProvider placeholderValueProvider);
 
     @NotNull PlaceholderReplacer createPlaceholderReplacer(char startDelimiter, char endDelimiter);
 
