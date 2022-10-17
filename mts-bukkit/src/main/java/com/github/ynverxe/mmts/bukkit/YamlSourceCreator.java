@@ -13,8 +13,8 @@ public final class YamlSourceCreator extends AbstractFileSourceCreator {
 
     private final Plugin plugin;
 
-    public YamlSourceCreator(File folder, String extension, Plugin plugin) {
-        super(folder, extension);
+    public YamlSourceCreator(File folder, String fileFormat, Plugin plugin) {
+        super(folder, fileFormat);
         this.plugin = Objects.requireNonNull(plugin, "plugin");
     }
 
