@@ -1,20 +1,21 @@
-package com.github.ynverxe.mmts.core.format;
+package com.github.ynverxe.mmts.core.impl;
 
 import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
+import com.github.ynverxe.mmts.core.format.*;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacerImpl;
 import com.github.ynverxe.mmts.core.util.ComposedKey;
 import com.github.ynverxe.mmts.core.remittent.Remittent;
-import com.github.ynverxe.mmts.translation.MessageData;
+import com.github.ynverxe.mmts.translation.ResourceData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked, rawtypes")
-public class MessageFormatterImpl implements MessageFormatter {
+public class ObjectFormatterImpl implements ObjectFormatter {
 
     private final Map<ComposedKey, Object> messageHandlersMap = new HashMap<>();
     private final Map<PlaceholderDelimiterPack, PlaceholderReplacer> placeholderReplacerMap = new HashMap<>();
@@ -23,45 +24,43 @@ public class MessageFormatterImpl implements MessageFormatter {
 
     private final PlaceholderReplacer DEFAULT_PLACEHOLDER_REPLACER = createPlaceholderReplacer('%', '%');
 
-    public MessageFormatterImpl() {
-        addMessageCreator(String.class, new StringMessageExpansion());
+    public ObjectFormatterImpl() {
+        addMessageCreator(String.class, new StringExpansion());
     }
 
     @Override
     public @Nullable Object tryFormatAndReconstruct(
-            @NotNull Object object, @Nullable FormattingContext.Configurator contextConfigurator
+            @NotNull Object object, @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) {
         try {
-            MessageData messageData = toMessageData(object);
+            ResourceData resourceData = toResourceData(object);
 
-            if (messageData == null) return null;
+            if (resourceData == null) return null;
 
-            return formatMessage(messageData, object.getClass(), contextConfigurator);
+            return formatData(resourceData, object.getClass(), formattingMetricsHolder);
         } catch (NoCreatorFoundException ignored) {}
 
         return object;
     }
 
     @Override
-    public <T> @NotNull T formatMessage(
-            @NotNull MessageData messageData,
+    public <T> @NotNull T formatData(
+            @NotNull ResourceData resourceData,
             @NotNull Class<T> requiredMessageClass,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws NoCreatorFoundException {
-        MessageExpansion<T> messageExpansion = (MessageExpansion<T>) messageHandlersMap.get(
+        ObjectExpansion<T> objectExpansion = (ObjectExpansion<T>) messageHandlersMap.get(
                 forMessageCreator(Objects.requireNonNull(requiredMessageClass, "messageClass"))
         );
 
-        if (messageExpansion == null) throw new NoCreatorFoundException(requiredMessageClass.toString());
+        if (objectExpansion == null) throw new NoCreatorFoundException(requiredMessageClass.toString());
 
-        FormattingContext formattingContext = new FormattingContext(requiredMessageClass);
+        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : new FormattingMetricsHolder();
 
-        if (contextConfigurator != null) contextConfigurator.configure(formattingContext);
-
-        T message = messageExpansion.createNewMessage(
-                messageData,
+        T message = objectExpansion.createNewMessage(
+                resourceData,
                 this,
-                formattingContext
+                formattingMetricsHolder
         );
 
         if (String.class != requiredMessageClass) {
@@ -71,7 +70,7 @@ public class MessageFormatterImpl implements MessageFormatter {
             );
 
             for (FormattingInterceptor<T> formattingInterceptor : list) {
-                message = formattingInterceptor.visit(message, formattingContext);
+                message = formattingInterceptor.visit(message, formattingMetricsHolder);
             }
         }
 
@@ -79,44 +78,40 @@ public class MessageFormatterImpl implements MessageFormatter {
     }
 
     @Override
-    public @NotNull Object formatAbstractMessage(
-            @NotNull MessageData messageData,
-            FormattingContext.@Nullable Configurator contextConfigurator
+    public @NotNull Object formatAbstractResource(
+            @NotNull ResourceData resourceData,
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws IllegalArgumentException {
-        String messageAlias = messageData.getString("alias");
+        String messageAlias = resourceData.getString("alias");
 
         if (messageAlias == null)
             throw new IllegalArgumentException("no alias found");
 
-        return formatMessage(messageData, messageAlias, contextConfigurator);
+        return formatData(resourceData, messageAlias, formattingMetricsHolder);
     }
 
     @Override
-    public @NotNull Object formatMessage(
-            @NotNull MessageData messageData,
+    public @NotNull Object formatData(
+            @NotNull ResourceData resourceData,
             @NotNull String alias,
-            FormattingContext.@Nullable Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws IllegalArgumentException {
         Class messageType = messageAliases.get(alias);
 
         if (messageType == null)
             throw new IllegalArgumentException("no class found with alias: " + alias);
 
-        return formatMessage(messageData, messageType, contextConfigurator);
+        return formatData(resourceData, messageType, formattingMetricsHolder);
     }
 
     @Override
     public @NotNull String formatString(
             @NotNull String str,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) {
-        FormattingContext formattingContext = new FormattingContext(String.class);
+        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : new FormattingMetricsHolder();
 
-        if (contextConfigurator != null) {
-            contextConfigurator.configure(formattingContext);
-        }
-
-        boolean skipPlaceholderFormatting = formattingContext
+        boolean skipPlaceholderFormatting = formattingMetricsHolder
                 .optionalDataGet(FormattingContextNamespaces.SKIP_PLACEHOLDER_APPLICATION, boolean.class)
                 .orElse(false);
 
@@ -124,9 +119,9 @@ public class MessageFormatterImpl implements MessageFormatter {
             PlaceholderReplacer placeholderReplacer = DEFAULT_PLACEHOLDER_REPLACER;
 
             PlaceholderDelimiterPack placeholderDelimiterPack =
-                    formattingContext.getData(FormattingContextNamespaces.PLACEHOLDER_DELIMITER_NAMESPACE, PlaceholderDelimiterPack.class);
+                    formattingMetricsHolder.findData(FormattingContextNamespaces.PLACEHOLDER_DELIMITER, PlaceholderDelimiterPack.class);
 
-            Remittent remittent = formattingContext.getData(FormattingContextNamespaces.REMITTENT_NAMESPACE, Remittent.class);
+            Remittent remittent = formattingMetricsHolder.findData(FormattingContextNamespaces.REMITTENT_NAMESPACE, Remittent.class);
 
             if (remittent != null) {
                 if (placeholderDelimiterPack != null) {
@@ -137,44 +132,37 @@ public class MessageFormatterImpl implements MessageFormatter {
             }
         }
 
-        for (Map.Entry<String, String> entry : formattingContext.getReplacements().entrySet()) {
-            String target = entry.getKey();
-            String replacement = entry.getValue();
-
-            str = str.replace(target, replacement);
-        }
-
         List<FormattingInterceptor<String>> list = (List<FormattingInterceptor<String>>) this.messageHandlersMap.getOrDefault(
                 forMessageInterceptor(String.class),
                 Collections.emptyList()
         );
 
         for (FormattingInterceptor<String> formattingInterceptor : list) {
-            str = formattingInterceptor.visit(str, formattingContext);
+            str = formattingInterceptor.visit(str, formattingMetricsHolder);
         }
 
         return str;
     }
 
     @Override
-    public @Nullable MessageData toMessageData(@NotNull Object obj) {
+    public @Nullable ResourceData toResourceData(@NotNull Object obj) {
         Class messageClass = obj.getClass();
-        MessageExpansion messageExpansion = (MessageExpansion) messageHandlersMap.get(
+        ObjectExpansion objectExpansion = (ObjectExpansion) messageHandlersMap.get(
                 forMessageCreator(messageClass)
         );
 
-        if (messageExpansion == null) throw new NoCreatorFoundException(messageClass.toString());
+        if (objectExpansion == null) throw new NoCreatorFoundException(messageClass.toString());
 
-        return messageExpansion.dismountAsData(obj);
+        return objectExpansion.dismountAsData(obj);
     }
 
     @Override
     public <T> void addMessageCreator(
-            @NotNull Class<T> messageClass, @NotNull MessageExpansion<T> messageExpansion
+            @NotNull Class<T> messageClass, @NotNull ObjectExpansion<T> objectExpansion
     ) {
         this.messageHandlersMap.put(
                 forMessageCreator(Objects.requireNonNull(messageClass, "messageClass")),
-                Objects.requireNonNull(messageExpansion, "messageCreator")
+                Objects.requireNonNull(objectExpansion, "messageCreator")
         );
     }
 

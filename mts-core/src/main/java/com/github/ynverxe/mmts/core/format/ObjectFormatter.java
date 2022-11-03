@@ -1,45 +1,46 @@
 package com.github.ynverxe.mmts.core.format;
 
 import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
+import com.github.ynverxe.mmts.core.impl.ObjectFormatterImpl;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
-import com.github.ynverxe.mmts.translation.MessageData;
+import com.github.ynverxe.mmts.translation.ResourceData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface MessageFormatter {
+public interface ObjectFormatter {
 
-    @NotNull Object formatMessage(
-            @NotNull MessageData messageData,
+    @NotNull Object formatData(
+            @NotNull ResourceData resourceData,
             @NotNull String alias,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws IllegalArgumentException;
 
     @Nullable Object tryFormatAndReconstruct(
             @NotNull Object object,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     );
 
-    @NotNull Object formatAbstractMessage(
-            @NotNull MessageData messageData,
-            @Nullable FormattingContext.Configurator contextConfigurator
+    @NotNull Object formatAbstractResource(
+            @NotNull ResourceData resourceData,
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws IllegalArgumentException;
 
-    <T> @NotNull T formatMessage(
-            @NotNull MessageData messageData,
+    <T> @NotNull T formatData(
+            @NotNull ResourceData resourceData,
             @NotNull Class<T> requiredMessageClass,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) throws NoCreatorFoundException;
 
     @NotNull String formatString(
             @NotNull String str,
-            @Nullable FormattingContext.Configurator contextConfigurator
+            @Nullable FormattingMetricsHolder formattingMetricsHolder
     );
 
-    @Nullable MessageData toMessageData(@NotNull Object obj);
+    @Nullable ResourceData toResourceData(@NotNull Object obj);
 
-    <T> void addMessageCreator(@NotNull Class<T> messageClass, @NotNull MessageExpansion<T> messageExpansion);
+    <T> void addMessageCreator(@NotNull Class<T> messageClass, @NotNull ObjectExpansion<T> objectExpansion);
 
     <T> void addFormattingVisitor(@NotNull Class<T> messageClass, @NotNull FormattingInterceptor<T> formattingInterceptor);
 
@@ -51,7 +52,7 @@ public interface MessageFormatter {
 
     void bindMessageTypeAlias(@NotNull String alias, @NotNull Class<?> messageType);
 
-    static @NotNull MessageFormatter newMessageFormatter() {
-        return new MessageFormatterImpl();
+    static @NotNull ObjectFormatter newObjectFormatter() {
+        return new ObjectFormatterImpl();
     }
 }
