@@ -1,81 +1,34 @@
 package com.github.ynverxe.mmts.core.format;
 
+import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Optional;
 
-import static com.github.ynverxe.mmts.core.format.FormattingContextNamespaces.*;
+public interface FormattingMetricsHolder {
 
-@SuppressWarnings("unchecked, rawtypes, unused, UnusedReturnValue")
-public class FormattingMetricsHolder {
+    boolean isSkipPlaceholderFormatting();
 
-    protected boolean skipPlaceholderFormatting;
-    protected final Map<String, Object> extraData = new HashMap<>();
+    @NotNull FormattingMetricsHolder skipPlaceholderFormatting(boolean skipPlaceholderFormatting);
 
-    public boolean isSkipPlaceholderFormatting() {
-        return skipPlaceholderFormatting;
-    }
+    @NotNull FormattingMetricsHolder replacements(@NotNull Object... replacements);
 
-    public @NotNull FormattingMetricsHolder skipPlaceholderFormatting(boolean skipPlaceholderFormatting) {
-        this.skipPlaceholderFormatting = skipPlaceholderFormatting;
+    @NotNull FormattingMetricsHolder placeholderDelimiter(@NotNull PlaceholderDelimiterPack placeholderDelimiterPack);
 
-        return this;
-    }
+    @NotNull FormattingMetricsHolder placeholderDelimiter(char delimiter);
 
-    public @NotNull FormattingMetricsHolder data(@NotNull String key, @NotNull Object value) {
-        extraData.put(Objects.requireNonNull(key, "key"), value);
-        return this;
-    }
+    @NotNull FormattingMetricsHolder data(@NotNull String key, @NotNull Object value);
 
-    public @Nullable Object findData(@NotNull String key) {
-        return extraData.get(key);
-    }
+    @Nullable Object findData(@NotNull String key);
 
-    public @Nullable <V> V findData(@NotNull String key, @NotNull Class<V> valueClass) {
-        return valueClass.cast(findData(key));
-    }
+    @Nullable <V> V findData(@NotNull String key, @NotNull Class<V> valueClass);
 
-    public @NotNull FormattingMetricsHolder replacements(@NotNull Object... replacements) {
-        if (replacements.length % 2 != 0)
-            throw new IllegalArgumentException("replacements must be divisible by 2");
+    @NotNull FormattingMetricsHolder copy();
 
-        Map<String, String> replacementValues = (Map<String, String>) extraData.computeIfAbsent(REPLACEMENT_VALUES,
-                (k) -> new HashMap<>());
+    @NotNull <T> Optional<T> optionalDataGet(String key, Class<T> clazz);
 
-        for (int i = 0; i < replacements.length; i++) {
-            String key = (String) replacements[i];
-            i++;
-            String value = Objects.toString(replacements[i]);
-
-            replacementValues.put(key, value);
-        }
-
-        return this;
-    }
-
-    public FormattingMetricsHolder copy() {
-        FormattingMetricsHolder formattingMetricsHolder = new FormattingMetricsHolder();
-        handleChildCopy(formattingMetricsHolder);
-
-        return formattingMetricsHolder;
-    }
-
-    protected void handleChildCopy(FormattingMetricsHolder another) {
-        another.skipPlaceholderFormatting = skipPlaceholderFormatting;
-        another.extraData.putAll(extraData);
-
-        Map replacementValues = (Map) another.extraData.getOrDefault(REPLACEMENT_VALUES, Collections.emptyMap());
-        replacementValues.putAll((Map) extraData.getOrDefault(REPLACEMENT_VALUES, Collections.emptyMap()));
-    }
-
-    public <T> Optional<T> optionalDataGet(String key, Class<T> clazz) {
-        Object found = findData(key);
-
-        if (clazz.isInstance(found)) {
-            return Optional.of((T) found);
-        }
-
-        return Optional.empty();
+    static @NotNull FormattingMetricsHolder create() {
+        return new SimpleFormattingMetricsHolder();
     }
 }
