@@ -2,11 +2,12 @@ package com.github.ynverxe.mmts.core;
 
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
-import com.github.ynverxe.mmts.core.format.MessageExpansion;
+import com.github.ynverxe.mmts.core.format.ObjectExpansion;
 import com.github.ynverxe.mmts.core.format.FormattingInterceptor;
 import com.github.ynverxe.mmts.translation.TranslationSource;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public interface MMTSModule {
 
     default <E> EntityHandlerContainer<E> getEntityContainer(@NotNull Class<E> entityClass, boolean hierarchyFind) {
@@ -27,13 +28,13 @@ public interface MMTSModule {
         mmtsHandler.addTranslationSource(lang, translationSource);
     }
 
-    default <T> void installExpansion(@NotNull Class<T> messageType, @NotNull MessageExpansion<T> messageExpansion) {
+    default <T> void installExpansion(@NotNull Class<T> messageType, @NotNull ObjectExpansion<T> objectExpansion) {
         MMTSHandler mmtsHandler = getMMTSHandler();
 
         if (mmtsHandler == null)
             throw new IllegalStateException("MMTSHandler is not initialized");
 
-        mmtsHandler.addMessageCreator(messageType, messageExpansion);
+        mmtsHandler.addMessageCreator(messageType, objectExpansion);
     }
 
     default <T> void addFormattingVisitor(@NotNull Class<T> messageType, @NotNull FormattingInterceptor<T> formattingInterceptor) {
