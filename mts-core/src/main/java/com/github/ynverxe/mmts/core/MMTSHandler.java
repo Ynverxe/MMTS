@@ -1,28 +1,21 @@
 package com.github.ynverxe.mmts.core;
 
-import com.github.ynverxe.mmts.core.format.FormattingContext;
-import com.github.ynverxe.mmts.core.format.MessageFormatter;
+import com.github.ynverxe.mmts.core.format.ObjectFormatter;
+import com.github.ynverxe.mmts.core.impl.MMTSHandlerImpl;
 import com.github.ynverxe.mmts.core.message.Messenger;
+import com.github.ynverxe.mmts.core.resource.FindableResource;
 import com.github.ynverxe.mmts.translation.SourceCreator;
 import com.github.ynverxe.mmts.translation.TranslationFinder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.Map;
 
-public interface MMTSHandler extends TranslationFinder, Messenger, MessageFormatter {
+public interface MMTSHandler extends TranslationFinder, Messenger, ObjectFormatter {
 
-    @NotNull Optional<?> translateAndFormat(
-            @NotNull Object langOrEntity,
-            @NotNull String path,
-            @NotNull Class<?> messageClass,
-            @Nullable FormattingContext.Configurator contextConfigurator
-    );
-
-    @NotNull Optional<?> translateAndFormat(
-            @NotNull Object langOrEntity,
-            @NotNull String path,
-            @Nullable FormattingContext.Configurator contextConfigurator
+    @NotNull Map<Object, Object> processModel(
+            @NotNull FindableResource model,
+            @NotNull Object... entitiesOrLanguages
     );
 
     @NotNull <E> EntityHandlerContainer<E> getContainerFor(@NotNull Class<E> entityClass);
