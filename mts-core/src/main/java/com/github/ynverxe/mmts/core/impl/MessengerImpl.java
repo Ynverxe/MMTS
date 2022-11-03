@@ -27,7 +27,7 @@ public class MessengerImpl implements Messenger {
 
     @Override
     public void dispatchMessage(@NotNull Object message, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
-        dispatchMessage(message, mode, entityOrEntities, new FormattingMetricsHolder(), replacements);
+        dispatchMessage(message, mode, entityOrEntities, FormattingMetricsHolder.create(), replacements);
     }
 
     @Override
