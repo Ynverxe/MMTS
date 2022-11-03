@@ -14,7 +14,7 @@ public class TestMMTSModule extends AbstractMMTSModule {
         getEntityContainer(Identity.class, false)
                 .bindSender(new TestMessageSender())
                 .bindLinguist(Identity::getLang)
-                .bindStrategy((messenger, entity, path) -> entity.handleReceivedMessage(path));
+                .bindStrategy((mmtsHandler, entity, path) -> entity.handleReceivedMessage(path));
 
         installPlaceholderApplier("player", MessengerTestContext.PLACEHOLDER_APPLIER);
     }
