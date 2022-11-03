@@ -1,12 +1,13 @@
 package com.github.ynverxe.mmts.core.resource;
 
 import com.github.ynverxe.mmts.core.format.FormattingMetricsHolder;
+import com.github.ynverxe.mmts.core.format.SimpleFormattingMetricsHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class FindableResource extends FormattingMetricsHolder {
+public class FindableResource extends SimpleFormattingMetricsHolder {
 
     private final String typeName;
     private final Class<?> messageClass;
@@ -36,7 +37,7 @@ public class FindableResource extends FormattingMetricsHolder {
         return abstractValue;
     }
 
-    public FindableResource copy() {
+    public @NotNull FormattingMetricsHolder copy() {
         FindableResource model = new FindableResource(typeName, messageClass, path, abstractValue);
 
         handleChildCopy(model);
