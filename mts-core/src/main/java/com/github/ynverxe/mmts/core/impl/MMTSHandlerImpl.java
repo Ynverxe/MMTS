@@ -1,15 +1,19 @@
-package com.github.ynverxe.mmts.core;
+package com.github.ynverxe.mmts.core.impl;
 
+import com.github.ynverxe.mmts.core.EntityHandlerContainer;
+import com.github.ynverxe.mmts.core.MMTSHandler;
 import com.github.ynverxe.mmts.core.entity.EntityResolver;
 import com.github.ynverxe.mmts.core.entity.EntityStrategy;
 import com.github.ynverxe.mmts.core.entity.MessageSender;
 import com.github.ynverxe.mmts.core.exception.NoCreatorFoundException;
-import com.github.ynverxe.mmts.core.format.MessageExpansion;
-import com.github.ynverxe.mmts.core.format.FormattingContext;
+import com.github.ynverxe.mmts.core.format.FormattingMetricsHolder;
+import com.github.ynverxe.mmts.core.format.ObjectExpansion;
 import com.github.ynverxe.mmts.core.format.FormattingInterceptor;
-import com.github.ynverxe.mmts.core.format.MessageFormatter;
-import com.github.ynverxe.mmts.core.message.SimpleConfigurableMessage;
-import com.github.ynverxe.mmts.core.message.TranslatingConfigurableMessage;
+import com.github.ynverxe.mmts.core.format.ObjectFormatter;
+import com.github.ynverxe.mmts.core.format.def.ReplacementValuesApplier;
+import com.github.ynverxe.mmts.core.message.MessagingResource;
+import com.github.ynverxe.mmts.core.message.Messenger;
+import com.github.ynverxe.mmts.core.resource.FindableResource;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderValueProvider;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderDelimiterPack;
 import com.github.ynverxe.mmts.core.placeholder.PlaceholderReplacer;
@@ -17,7 +21,7 @@ import com.github.ynverxe.mts.common.HierarchyMapSearchUtil;
 import com.github.ynverxe.mmts.translation.AbstractTranslationFinder;
 import com.github.ynverxe.mmts.translation.Linguist;
 import com.github.ynverxe.mmts.translation.SourceCreator;
-import com.github.ynverxe.mmts.translation.MessageData;
+import com.github.ynverxe.mmts.translation.ResourceData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,24 +30,54 @@ import java.util.*;
 @SuppressWarnings("unchecked, rawtypes")
 public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHandler {
 
-    private final MessageFormatter messageFormatter;
+    private final Messenger messenger;
+    private final ObjectFormatter objectFormatter;
     private final Map<Class, EntityHandlerContainer> entityHandlerContainerMap = new HashMap<>();
 
     public MMTSHandlerImpl(SourceCreator sourceCreator) {
         super(sourceCreator);
-        this.messageFormatter = MessageFormatter.newMessageFormatter();
+        this.objectFormatter = ObjectFormatter.newObjectFormatter();
+        this.messenger = new MessengerImpl(this);
+        addFormattingVisitor(String.class, new ReplacementValuesApplier(this));
     }
 
     @Override
-    public @NotNull Optional<?> translateAndFormat(@NotNull Object langOrEntity, @NotNull String path, @NotNull Class<?> messageClass, FormattingContext.@Nullable Configurator contextConfigurator) {
-        return findTranslationData(path, langOrEntity)
-                .map(translationData -> formatMessage(translationData, messageClass, contextConfigurator));
-    }
+    public @NotNull Map<Object, Object> processModel(
+            @NotNull FindableResource model,
+            @NotNull Object... entitiesOrLanguages
+    ) {
+        String path = model.path();
+        Map<String, ResourceData> cachedData = new HashMap<>();
+        Map<Object, Object> finalValuesByEntityOrLang = new HashMap<>();
 
-    @Override
-    public @NotNull Optional<?> translateAndFormat(@NotNull Object langOrEntity, @NotNull String path, FormattingContext.@Nullable Configurator contextConfigurator) {
-        return findTranslationData(path, langOrEntity)
-                .map(translationData -> formatAbstractMessage(translationData, contextConfigurator));
+        for (Object entityOrLanguage : entitiesOrLanguages) {
+            String lang = entityOrLanguage instanceof String ? (String) entityOrLanguage : resolveLang(entityOrLanguage);
+
+            ResourceData resourceData = cachedData.get(lang);
+
+            if (resourceData == null) {
+                cachedData.put(lang, resourceData = getTranslationData(lang, path));
+            }
+
+            if (resourceData.getDataMap().isEmpty()) continue;
+
+            Object value;
+            if (model.abstractValue()) {
+                value = formatAbstractResource(resourceData, model);
+            } else {
+                String alias = model.typeName();
+                if (alias != null) {
+                    value = formatData(resourceData, alias, model);
+                } else {
+                    //noinspection ConstantConditions
+                    value = formatData(resourceData, model.messageClass(), model);
+                }
+            }
+
+            finalValuesByEntityOrLang.put(entityOrLanguage, value);
+        }
+
+        return finalValuesByEntityOrLang;
     }
 
     @Override
@@ -77,86 +111,63 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
     }
 
     @Override
-    public @NotNull SimpleConfigurableMessage prepareMessage(@NotNull Object message) {
-        return new SimpleConfigurableMessage(this, Objects.requireNonNull(message, "message"));
+    public @NotNull Object formatData(@NotNull ResourceData resourceData, @NotNull String alias, @Nullable FormattingMetricsHolder formattingMetricsHolder) throws IllegalArgumentException {
+        return objectFormatter.formatData(resourceData, alias, formattingMetricsHolder);
     }
 
     @Override
-    public @NotNull TranslatingConfigurableMessage translating(@NotNull String path, @NotNull Class<?> messageClass) {
-        return new TranslatingConfigurableMessage(
-                this,
-                Objects.requireNonNull(path, "path"),
-                Objects.requireNonNull(messageClass, "messageClass")
-        );
+    public @Nullable Object tryFormatAndReconstruct(@NotNull Object object, @Nullable FormattingMetricsHolder formattingMetricsHolder) {
+        return objectFormatter.tryFormatAndReconstruct(object, formattingMetricsHolder);
     }
 
     @Override
-    public @NotNull TranslatingConfigurableMessage translatingAbstractMessage(@NotNull String path) {
-        return new TranslatingConfigurableMessage(
-                this,
-                Objects.requireNonNull(path, "path"),
-                null
-        );
+    public @NotNull Object formatAbstractResource(@NotNull ResourceData resourceData, @Nullable FormattingMetricsHolder formattingMetricsHolder) throws IllegalArgumentException {
+        return objectFormatter.formatAbstractResource(resourceData, formattingMetricsHolder);
     }
 
     @Override
-    public @Nullable Object tryFormatAndReconstruct(@NotNull Object object, FormattingContext.@Nullable Configurator contextConfigurator) {
-        return messageFormatter.tryFormatAndReconstruct(object, contextConfigurator);
+    public <T> @NotNull T formatData(@NotNull ResourceData resourceData, @NotNull Class<T> requiredMessageClass, @Nullable FormattingMetricsHolder formattingMetricsHolder) throws NoCreatorFoundException {
+        return objectFormatter.formatData(resourceData, requiredMessageClass, formattingMetricsHolder);
     }
 
     @Override
-    public @NotNull Object formatAbstractMessage(@NotNull MessageData messageData, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
-        return messageFormatter.formatAbstractMessage(messageData, contextConfigurator);
+    public @NotNull String formatString(@NotNull String str, @Nullable FormattingMetricsHolder formattingMetricsHolder) {
+        return objectFormatter.formatString(str, formattingMetricsHolder);
     }
 
     @Override
-    public @NotNull Object formatMessage(@NotNull MessageData messageData, @NotNull String alias, FormattingContext.@Nullable Configurator contextConfigurator) throws IllegalArgumentException {
-        return messageFormatter.formatMessage(messageData, alias, contextConfigurator);
+    public @Nullable ResourceData toResourceData(@NotNull Object obj) {
+        return objectFormatter.toResourceData(obj);
     }
 
     @Override
-    public <T> @NotNull T formatMessage(@NotNull MessageData messageData, @NotNull Class<T> requiredMessageClass, FormattingContext.@Nullable Configurator contextConfigurator) throws NoCreatorFoundException {
-        return messageFormatter.formatMessage(messageData, requiredMessageClass, contextConfigurator);
-    }
-
-    @Override
-    public @NotNull String formatString(@NotNull String str, FormattingContext.@Nullable Configurator contextConfigurator) {
-        return messageFormatter.formatString(str, contextConfigurator);
-    }
-
-    @Override
-    public @Nullable MessageData toMessageData(@NotNull Object obj) {
-        return messageFormatter.toMessageData(obj);
-    }
-
-    @Override
-    public <T> void addMessageCreator(@NotNull Class<T> messageClass, @NotNull MessageExpansion<T> messageExpansion) {
-        messageFormatter.addMessageCreator(messageClass, messageExpansion);
+    public <T> void addMessageCreator(@NotNull Class<T> messageClass, @NotNull ObjectExpansion<T> objectExpansion) {
+        objectFormatter.addMessageCreator(messageClass, objectExpansion);
     }
 
     @Override
     public <T> void addFormattingVisitor(@NotNull Class<T> messageClass, @NotNull FormattingInterceptor<T> formattingInterceptor) {
-        messageFormatter.addFormattingVisitor(messageClass, formattingInterceptor);
+        objectFormatter.addFormattingVisitor(messageClass, formattingInterceptor);
     }
 
     @Override
     public void addPlaceholderValueProvider(@NotNull String identifier, @NotNull PlaceholderValueProvider placeholderValueProvider) {
-        messageFormatter.addPlaceholderValueProvider(identifier, placeholderValueProvider);
+        objectFormatter.addPlaceholderValueProvider(identifier, placeholderValueProvider);
     }
 
     @Override
     public @NotNull PlaceholderReplacer createPlaceholderReplacer(char startDelimiter, char endDelimiter) {
-        return messageFormatter.createPlaceholderReplacer(startDelimiter, endDelimiter);
+        return objectFormatter.createPlaceholderReplacer(startDelimiter, endDelimiter);
     }
 
     @Override
     public @NotNull PlaceholderReplacer createPlaceholderReplacer(@NotNull PlaceholderDelimiterPack placeholderDelimiterPack) {
-        return messageFormatter.createPlaceholderReplacer(placeholderDelimiterPack);
+        return objectFormatter.createPlaceholderReplacer(placeholderDelimiterPack);
     }
 
     @Override
     public void bindMessageTypeAlias(@NotNull String alias, @NotNull Class<?> messageType) {
-        messageFormatter.bindMessageTypeAlias(alias, messageType);
+        objectFormatter.bindMessageTypeAlias(alias, messageType);
     }
 
     @Override
@@ -186,6 +197,21 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
         EntityHandlerContainer entityHandlerContainer = getContainerFor(entityClass);
 
         entityHandlerContainer.bindLinguist(linguist);
+    }
+
+    @Override
+    public void dispatchMessage(@NotNull Object message, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
+        messenger.dispatchMessage(message, mode, entityOrEntities, replacements);
+    }
+
+    @Override
+    public void dispatchMessage(@NotNull Object message, @Nullable String mode, @NotNull Object entityOrEntities, @NotNull FormattingMetricsHolder formattingMetricsHolder, Object... replacements) {
+        messenger.dispatchMessage(message, mode, entityOrEntities, formattingMetricsHolder, replacements);
+    }
+
+    @Override
+    public void dispatchMessage(@NotNull MessagingResource messagingResource, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
+        messenger.dispatchMessage(messagingResource, mode, entityOrEntities, replacements);
     }
 
     static class EntityHandlerContainerImpl<E> implements EntityHandlerContainer<E> {
