@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mts-bukkit</artifactId>
-    <version>0.0.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
