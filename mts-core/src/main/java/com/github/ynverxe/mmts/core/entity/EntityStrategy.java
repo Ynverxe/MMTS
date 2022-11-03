@@ -1,13 +1,13 @@
 package com.github.ynverxe.mmts.core.entity;
 
-import com.github.ynverxe.mmts.core.message.Messenger;
+import com.github.ynverxe.mmts.core.MMTSHandler;
 import org.jetbrains.annotations.NotNull;
 
 public interface EntityStrategy<E> {
 
     void onNoMessageFound(
-            @NotNull Messenger messenger,
+            @NotNull MMTSHandler mmtsHandler,
             @NotNull E entity,
-            @NotNull String path
+            @NotNull String missingPath
     );
 }
