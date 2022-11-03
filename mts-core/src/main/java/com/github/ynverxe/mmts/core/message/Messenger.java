@@ -1,13 +1,30 @@
 package com.github.ynverxe.mmts.core.message;
 
+import com.github.ynverxe.mmts.core.format.FormattingMetricsHolder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Messenger {
 
-    @NotNull SimpleConfigurableMessage prepareMessage(@NotNull Object message);
+    void dispatchMessage(
+            @NotNull Object message,
+            @Nullable String mode,
+            @NotNull Object entityOrEntities,
+            Object... replacements
+    );
 
-    @NotNull TranslatingConfigurableMessage translating(@NotNull String path, @NotNull Class<?> messageClass);
+    void dispatchMessage(
+            @NotNull Object message,
+            @Nullable String mode,
+            @NotNull Object entityOrEntities,
+            @NotNull FormattingMetricsHolder formattingMetricsHolder,
+            Object... replacements
+    );
 
-    @NotNull TranslatingConfigurableMessage translatingAbstractMessage(@NotNull String path);
-
+    void dispatchMessage(
+            @NotNull MessagingResource messagingResource,
+            @Nullable String mode,
+            @NotNull Object entityOrEntities,
+            Object... replacements
+    );
 }
