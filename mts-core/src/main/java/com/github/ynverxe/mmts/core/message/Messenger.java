@@ -20,11 +20,4 @@ public interface Messenger {
             @NotNull FormattingMetricsHolder formattingMetricsHolder,
             Object... replacements
     );
-
-    void dispatchMessage(
-            @NotNull MessagingResource messagingResource,
-            @Nullable String mode,
-            @NotNull Object entityOrEntities,
-            Object... replacements
-    );
 }

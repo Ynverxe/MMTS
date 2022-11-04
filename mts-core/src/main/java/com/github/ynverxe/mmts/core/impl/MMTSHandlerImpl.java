@@ -209,11 +209,6 @@ public class MMTSHandlerImpl extends AbstractTranslationFinder implements MMTSHa
         messenger.dispatchMessage(message, mode, entityOrEntities, formattingMetricsHolder, replacements);
     }
 
-    @Override
-    public void dispatchMessage(@NotNull MessagingResource messagingResource, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
-        messenger.dispatchMessage(messagingResource, mode, entityOrEntities, replacements);
-    }
-
     static class EntityHandlerContainerImpl<E> implements EntityHandlerContainer<E> {
 
         private final List<MessageSender<E>> messageSenders = new ArrayList<>();

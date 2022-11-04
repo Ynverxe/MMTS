@@ -35,33 +35,36 @@ public class MessengerImpl implements Messenger {
         if (entityOrEntities instanceof Collection) {
             ((Collection<?>) entityOrEntities).forEach(entity -> dispatchMessage(message, mode, entity));
         } else {
-            formattingMetricsHolder.replacements(replacements);
+            if (message instanceof MessagingResource) {
+                dispatchWithResource((MessagingResource) message, mode, entityOrEntities, replacements);
+            } else {
+                formattingMetricsHolder.replacements(replacements);
 
-            MessagingProcessor messagingProcessor = newMessagingProcessor(
-                    entityOrEntities,
-                    message,
-                    null,
-                    formattingMetricsHolder,
-                    null
-            );
+                MessagingProcessor messagingProcessor = newMessagingProcessor(
+                        entityOrEntities,
+                        message,
+                        null,
+                        formattingMetricsHolder,
+                        null
+                );
 
-            if (messagingProcessor == null) return;
+                if (messagingProcessor == null) return;
 
-            messagingProcessor.setMode(mode);
+                messagingProcessor.setMode(mode);
 
-            messagingProcessor.dispatchMessage();
+                messagingProcessor.dispatchMessage();
+            }
         }
     }
 
-    @Override
-    public void dispatchMessage(@NotNull MessagingResource messagingResource, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
+    private void dispatchWithResource(@NotNull MessagingResource messagingResource, @Nullable String mode, @NotNull Object entityOrEntities, Object... replacements) {
         if (messagingResource instanceof FindableMessagingResource) {
             translateAndDispatch((FindableMessagingResource) messagingResource, mode, entityOrEntities, messagingResource::guaranteedValue, replacements);
         } else if (messagingResource.model() != null) {
             //noinspection ConstantConditions
             translateAndDispatch(messagingResource.model(), mode, entityOrEntities, messagingResource::guaranteedValue, replacements);
         } else {
-            dispatchMessage(messagingResource.guaranteedValue(), mode, entityOrEntities, replacements);
+            dispatchMessage(messagingResource.guaranteedValue(), mode, entityOrEntities, messagingResource.copy(), replacements);
         }
     }
 
