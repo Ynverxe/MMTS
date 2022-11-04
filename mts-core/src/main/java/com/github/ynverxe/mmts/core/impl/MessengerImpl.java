@@ -64,7 +64,7 @@ public class MessengerImpl implements Messenger {
             //noinspection ConstantConditions
             translateAndDispatch(messagingResource.model(), mode, entityOrEntities, messagingResource::guaranteedValue, replacements);
         } else {
-            dispatchMessage(messagingResource.guaranteedValue(), mode, entityOrEntities, messagingResource.copy(), replacements);
+            dispatchMessage(messagingResource.guaranteedValue(), mode, entityOrEntities, messagingResource, replacements);
         }
     }
 
@@ -84,7 +84,7 @@ public class MessengerImpl implements Messenger {
                     entityOrEntities,
                     null,
                     findableResource.path(),
-                    findableResource.copy(),
+                    findableResource,
                     defaultValueSupplier
             );
 
