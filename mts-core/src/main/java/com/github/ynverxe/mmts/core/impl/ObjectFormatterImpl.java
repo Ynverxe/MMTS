@@ -55,7 +55,7 @@ public class ObjectFormatterImpl implements ObjectFormatter {
 
         if (objectExpansion == null) throw new NoCreatorFoundException(requiredMessageClass.toString());
 
-        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : new FormattingMetricsHolder();
+        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : FormattingMetricsHolder.create();
 
         T message = objectExpansion.createNewMessage(
                 resourceData,
@@ -109,7 +109,7 @@ public class ObjectFormatterImpl implements ObjectFormatter {
             @NotNull String str,
             @Nullable FormattingMetricsHolder formattingMetricsHolder
     ) {
-        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : new FormattingMetricsHolder();
+        formattingMetricsHolder = formattingMetricsHolder != null ? formattingMetricsHolder.copy() : FormattingMetricsHolder.create();
 
         boolean skipPlaceholderFormatting = formattingMetricsHolder
                 .optionalDataGet(FormattingContextNamespaces.SKIP_PLACEHOLDER_APPLICATION, boolean.class)
