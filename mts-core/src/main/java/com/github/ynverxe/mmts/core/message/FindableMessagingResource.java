@@ -1,5 +1,6 @@
 package com.github.ynverxe.mmts.core.message;
 
+import com.github.ynverxe.mmts.core.format.SimpleFormattingMetricsHolder;
 import com.github.ynverxe.mmts.core.resource.FindableResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,5 +44,19 @@ public class FindableMessagingResource extends FindableResource implements Messa
                 abstractValue(),
                 guarantee
         );
+    }
+
+    @Override
+    public @NotNull MessagingResource mutableCopy() {
+        MessagingResource messagingResource = new FindableMessagingResource(
+                typeName(),
+                messageClass(),
+                path(),
+                abstractValue(),
+                guarantee
+        );
+
+        handleChildCopy((SimpleFormattingMetricsHolder) messagingResource);
+        return messagingResource;
     }
 }

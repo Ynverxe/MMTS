@@ -24,4 +24,9 @@ public class SimpleMessagingResource extends SimpleFormattingMetricsHolder imple
     public @NotNull MessagingResource or(@NotNull Object guarantee) {
         return this;
     }
+
+    @Override
+    public @NotNull MessagingResource mutableCopy() {
+        return new SimpleMessagingResource(value);
+    }
 }

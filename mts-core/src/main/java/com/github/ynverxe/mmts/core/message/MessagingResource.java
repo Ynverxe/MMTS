@@ -15,6 +15,16 @@ public interface MessagingResource extends FormattingMetricsHolder {
 
     @NotNull MessagingResource or(@NotNull Object guarantee);
 
+    default @NotNull ImmutableDelegatingMessagingResource immutableCopy() {
+        return new ImmutableDelegatingMessagingResource(this);
+    }
+
+    @NotNull MessagingResource mutableCopy();
+
+    default boolean isImmutable() {
+        return false;
+    }
+
     default @Nullable FindableResource model() {
         return null;
     }
