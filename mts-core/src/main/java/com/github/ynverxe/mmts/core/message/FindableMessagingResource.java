@@ -43,7 +43,14 @@ public class FindableMessagingResource extends FindableResource implements Messa
                 messageClass(),
                 path(),
                 abstractValue(),
-                guarantee
+                (Supplier<?>) () -> {
+                    Object oldGuarantee = this.guarantee;
+                    if (oldGuarantee instanceof Supplier) {
+                        oldGuarantee = ((Supplier<?>) oldGuarantee).get();
+                    }
+
+                    return oldGuarantee != null ? oldGuarantee : guarantee;
+                }
         );
     }
 
