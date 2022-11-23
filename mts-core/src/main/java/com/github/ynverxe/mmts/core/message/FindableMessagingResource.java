@@ -1,5 +1,6 @@
 package com.github.ynverxe.mmts.core.message;
 
+import com.github.ynverxe.mmts.core.format.FormattingMetricsHolder;
 import com.github.ynverxe.mmts.core.format.SimpleFormattingMetricsHolder;
 import com.github.ynverxe.mmts.core.resource.FindableResource;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public class FindableMessagingResource extends FindableResource implements Messa
     }
 
     @Override
-    public @NotNull MessagingResource mutableCopy() {
+    public @NotNull FormattingMetricsHolder copy() {
         MessagingResource messagingResource = new FindableMessagingResource(
                 typeName(),
                 messageClass(),
@@ -58,5 +59,10 @@ public class FindableMessagingResource extends FindableResource implements Messa
 
         handleChildCopy((SimpleFormattingMetricsHolder) messagingResource);
         return messagingResource;
+    }
+
+    @Override
+    public @NotNull MessagingResource mutableCopy() {
+        return (MessagingResource) FindableMessagingResource.this.copy();
     }
 }
