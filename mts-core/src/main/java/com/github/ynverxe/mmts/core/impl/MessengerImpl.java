@@ -117,6 +117,8 @@ public class MessengerImpl implements Messenger {
         entity = mmtsHandler.tryResolveEntity(entity);
 
         EntityHandlerContainer entityHandlerContainer = mmtsHandler.findContainerByHierarchy(entity.getClass());
+
+        if (entityHandlerContainer == null) throw new IllegalArgumentException("no handler container found for: " + entity.getClass());
         messagingProcessor.setEntityHandlerContainer(entityHandlerContainer);
 
         messagingProcessor.setFormattingMetricsHolder(formattingMetricsHolder);
