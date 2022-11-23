@@ -51,7 +51,7 @@ final class MessagingProcessor {
     }
 
     void setFormattingMetricsHolder(FormattingMetricsHolder formattingMetricsHolder) {
-        this.formattingMetricsHolder = formattingMetricsHolder.copy();
+        this.formattingMetricsHolder = formattingMetricsHolder;
     }
 
     void setMessage(Object message) {

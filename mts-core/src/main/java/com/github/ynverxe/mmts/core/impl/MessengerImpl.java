@@ -38,6 +38,8 @@ public class MessengerImpl implements Messenger {
             if (message instanceof MessagingResource) {
                 dispatchWithResource((MessagingResource) message, mode, entityOrEntities, replacements);
             } else {
+                formattingMetricsHolder = formattingMetricsHolder.copy();
+
                 formattingMetricsHolder.replacements(replacements);
 
                 MessagingProcessor messagingProcessor = newMessagingProcessor(
