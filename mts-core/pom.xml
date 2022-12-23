@@ -37,4 +37,32 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <id>shade</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.github.ynverxe.data</pattern>
+                            <shadedPattern>com.github.ynverxe.mmts.data</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
