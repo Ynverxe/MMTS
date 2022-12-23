@@ -1,6 +1,6 @@
 package com.github.ynverxe.mmts.translation;
 
-import com.github.ynverxe.mts.common.HierarchyMapSearchUtil;
+import com.github.ynverxe.mmts.common.HierarchyMapSearchUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

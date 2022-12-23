@@ -1,4 +1,4 @@
-package com.github.ynverxe.mts.common;
+package com.github.ynverxe.mmts.common;
 
 import java.util.Map;
 
